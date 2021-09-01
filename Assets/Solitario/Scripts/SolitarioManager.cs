@@ -271,6 +271,8 @@ public class SolitarioManager : MonoBehaviour
 
     void RestackTopDeck()
     {
+        currentDeck.Clear();
+
         foreach(string card in discardPile)
         {
             currentDeck.Add(card);
