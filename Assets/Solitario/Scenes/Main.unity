@@ -1952,7 +1952,7 @@ GameObject:
   - component: {fileID: 1626420028}
   - component: {fileID: 1626420027}
   m_Layer: 0
-  m_Name: mazzo
+  m_Name: Deck
   m_TagString: Deck
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

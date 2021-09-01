@@ -10,11 +10,13 @@ public class CardFaceUpdate : MonoBehaviour
     private SpriteRenderer sRenderer;
     private Selectable selectable;
     private SolitarioManager sManager;
+    private UserInputs userInputs;
 
     void Start()
     {
         List<string> deck = SolitarioManager.CreateCards();
         sManager = FindObjectOfType<SolitarioManager>();
+        userInputs = FindObjectOfType<UserInputs>();
 
         int i = 0;
         foreach(string card in deck)
@@ -42,6 +44,15 @@ public class CardFaceUpdate : MonoBehaviour
         else
         {
             sRenderer.sprite = cardBack;
+        }
+
+        if (userInputs.slot1)
+        {
+            if (name == userInputs.slot1.name)
+            
+                sRenderer.color = Color.yellow;         
+            else
+                sRenderer.color = Color.white;
         }
     }
 }

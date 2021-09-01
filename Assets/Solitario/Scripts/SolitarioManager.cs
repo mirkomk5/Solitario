@@ -12,7 +12,7 @@ public class SolitarioManager : MonoBehaviour
     public GameObject[] bottomPos;
     public GameObject[] topPos;
 
-    public static string[] semi = new string[] { "Cuori", "Quadri", "Fiori", "Picche" };
+    public static string[] semi = new string[] { "C", "Q", "F", "P" };
     public static string[] values = new string[] { "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
 
     public List<string> currentDeck;
@@ -116,9 +116,9 @@ public class SolitarioManager : MonoBehaviour
     }
 
 
-    public void PickFromDeal()
+    public void PickFromDeck()
     {
-        // Aggiunge le carte rimanenti a quelle scartate
+        // Aggiunge le carte rimanenti a quelle scartate ed elimina il tris di carte quando arriva alla fine
         foreach(Transform child in deckButton.transform)
         {
             if(child.tag == "Card")
@@ -229,6 +229,9 @@ public class SolitarioManager : MonoBehaviour
 
                 // Stabilisco un nome preciso per la carta
                 instance.name = card;
+
+                // Setta la riga dove è posizionata la carta
+                instance.GetComponent<Selectable>().row = i;
 
                 // Se la carta è l'ultima della fila, la mostrerò scoperta. Le altre rimarranno coperte
                 if(card == bottoms[i][bottoms[i].Count -1])
