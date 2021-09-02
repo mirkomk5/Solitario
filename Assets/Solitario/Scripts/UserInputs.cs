@@ -56,6 +56,8 @@ public class UserInputs : MonoBehaviour
     void DeckHandle()
     {
         solitario.PickFromDeck();
+
+        Solitario_Events.OnMoveDetected();
     }
 
     void CardHandle(GameObject selected)
@@ -86,12 +88,14 @@ public class UserInputs : MonoBehaviour
             if (Stackable(selected))
             {
                 Stack(selected);
+                Solitario_Events.OnStackOnBottom();
             }
             else
             {
                 slot1 = selected;
             }
         }
+
     }
 
     void TopHandle(GameObject selected)
@@ -102,8 +106,11 @@ public class UserInputs : MonoBehaviour
             if(slot1.GetComponent<Selectable>().value == 1)
             {
                 Stack(selected);
+                Solitario_Events.OnStackOnTop();
             }
         }
+
+        Solitario_Events.OnMoveDetected();
     }
 
     void BottomHandle(GameObject selected)
@@ -114,8 +121,11 @@ public class UserInputs : MonoBehaviour
             if(slot1.GetComponent<Selectable>().value == 13)
             {
                 Stack(selected);
+                Solitario_Events.OnStackOnBottom();
             }
         }
+
+        Solitario_Events.OnMoveDetected();
     }
 
 
@@ -156,11 +166,13 @@ public class UserInputs : MonoBehaviour
                     if (card1Red == card2Red)
                     {
                         print("Cards not stackable");
+                        Solitario_Events.OnStackFailed();
                         return false;
                     }
                     else
                     {
                         print("Cards stackable");
+                        Solitario_Events.OnStackSuccesfully();
                         return true;
                     }
                 }
@@ -206,14 +218,14 @@ public class UserInputs : MonoBehaviour
             yOffset = 0f;
         }
 
+        // stabilisco la posizione finale che assumerà la carta
         Vector3 target = new Vector3(selected.transform.position.x,
                                                 selected.transform.position.y - yOffset,
                                                 selected.transform.position.z - 0.1f);
+        
+        // Transizione lerp della carta
         StartCoroutine(MoveCard(slot1, target));
 
-        /*slot1.transform.position = new Vector3(selected.transform.position.x,
-                                                selected.transform.position.y - yOffset,
-                                                selected.transform.position.z - 0.1f);*/
         slot1.transform.parent = selected.transform;
 
         // Rimuove la carta dal mazzo
@@ -243,7 +255,7 @@ public class UserInputs : MonoBehaviour
         if(s2.top)
         {
             solitario.topPos[s1.row].GetComponent<Selectable>().value = s1.value;
-            solitario.topPos[s1.row].GetComponent<Selectable>().seme = s2.seme;
+            solitario.topPos[s1.row].GetComponent<Selectable>().seme = s1.seme;
             s1.top = true;
         }
         else
