@@ -201,13 +201,16 @@ public class SolitarioManager : MonoBehaviour
             {
                 GameObject topInstance = Instantiate(cardPrefab, new Vector3(deckButton.transform.position.x + xOffset, deckButton.transform.position.y, deckButton.transform.position.z + zOffset), Quaternion.identity, deckButton.transform);
                 xOffset -= Solitario_Params.CardOffset.xOffset;
-                zOffset -= 0.2f;
+                zOffset -= Solitario_Params.CardOffset.zOffset;
 
                 topInstance.name = card;
 
                 tripsOnDisplay.Add(card);
 
                 topInstance.GetComponent<Selectable>().faceUp = true;
+
+                // Marca la carta come inDeckPile per differenziarla dal resto delle carte presenti nella parte inferiore
+                topInstance.GetComponent<Selectable>().inDeckPile = true;
             }
 
             deckLocation++;

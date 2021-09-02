@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Solitario.Params;
+
 public class UserInputs : MonoBehaviour
 {
     public GameObject slot1;
@@ -136,11 +138,12 @@ public class UserInputs : MonoBehaviour
         Selectable s1 = slot1.GetComponent<Selectable>();
         Selectable s2 = selected.GetComponent<Selectable>();
 
+        // Previene che lo stack possa avvenire tra le carte inferiori verso quelle del mazzo
         if (!s2.inDeckPile)
         {
-            if (s2.top)
+            if (s2.top) // Stack delle carte nella parte superiore in ordine crescente e per seme
             {
-                if (s1.seme == s2.seme || (s1.value == 1 && s2.seme == null))
+                if (s1.seme == s2.seme || (s1.value == 1 && s2.seme == null))  // definisce quando la condizione sia vera per far avvenire lo stack
                 {
                     if (s1.value == s2.value + 1)
                         return true;
@@ -148,18 +151,18 @@ public class UserInputs : MonoBehaviour
                 else
                     return false;
             }
-            else
+            else  // Stack delle carte nella parte inferiore
             {
                 if (s1.value == s2.value - 1)
                 {
-                    // Determina il colore della carta dal suo seme. C = cuore => rosso. P = Picche => rosso
+                    // Determina il colore della carta dal suo seme. C = cuore => rosso. Q = Quadri => rosso
                     bool card1Red = false;
                     bool card2Red = false;
 
-                    if (s1.seme == "C" || s1.seme == "P")
+                    if (s1.seme == "C" || s1.seme == "Q")
                         card1Red = true;
 
-                    if (s2.seme == "C" || s2.seme == "P")
+                    if (s2.seme == "C" || s2.seme == "Q")
                         card2Red = true;
 
                     // Se le due carte hanno lo stesso colore non sono componibili. Diversamente invece ritornerà vero
@@ -211,7 +214,7 @@ public class UserInputs : MonoBehaviour
         Selectable s1 = slot1.GetComponent<Selectable>();
         Selectable s2 = selected.GetComponent<Selectable>();
 
-        float yOffset = 0.2f;
+        float yOffset = Solitario_Params.CardOffset.yOffset;
 
         if(s2.top || !s2.top && s1.value == 13)
         {
