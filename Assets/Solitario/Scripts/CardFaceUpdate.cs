@@ -11,6 +11,8 @@ public class CardFaceUpdate : MonoBehaviour
     private Selectable selectable;
     private SolitarioManager sManager;
     private UserInputs userInputs;
+    private Animator anim;
+    private bool flipped = false;
 
     void Start()
     {
@@ -32,6 +34,7 @@ public class CardFaceUpdate : MonoBehaviour
 
         sRenderer = GetComponent<SpriteRenderer>();
         selectable = GetComponent<Selectable>();
+        anim = GetComponent<Animator>();
     }
 
 
@@ -39,11 +42,15 @@ public class CardFaceUpdate : MonoBehaviour
     {
         if(selectable.faceUp == true)
         {
-            sRenderer.sprite = cardFace;
+            //sRenderer.sprite = cardFace;
+            if(!flipped)
+                StartCoroutine(CardFlipHandle(cardFace));
         }
         else
         {
-            sRenderer.sprite = cardBack;
+            //sRenderer.sprite = cardBack;
+            if(flipped)
+                StartCoroutine(CardFlipHandle(cardBack));
         }
 
         if (userInputs.slot1)
@@ -54,5 +61,14 @@ public class CardFaceUpdate : MonoBehaviour
             else
                 sRenderer.color = Color.white;
         }
+    }
+
+    IEnumerator CardFlipHandle(Sprite cardSprite)
+    {
+        anim.Play("card_flip");
+        yield return new WaitForSeconds(0.2f);
+        sRenderer.sprite = cardSprite;
+
+        flipped = !flipped;
     }
 }
