@@ -105,7 +105,7 @@ public class UserInputs : MonoBehaviour
         // Se la slot in alto è vuota e la carta selezionata è un asso, allora la carta può essere mossa
         if(slot1.CompareTag("Card"))
         {
-            if(slot1.GetComponent<Selectable>().value == 1)
+            if(slot1.GetComponent<Selectable>().value == 1 && slot1.GetComponent<Selectable>().seme == selected.GetComponent<Selectable>().seme)
             {
                 Stack(selected);
                 Solitario_Events.OnStackOnTop();

@@ -208,7 +208,7 @@ public class SolitarioManager : MonoBehaviour
                 tripsOnDisplay.Add(card);
 
                 topInstance.GetComponent<Selectable>().faceUp = true;
-
+                
                 // Marca la carta come inDeckPile per differenziarla dal resto delle carte presenti nella parte inferiore
                 topInstance.GetComponent<Selectable>().inDeckPile = true;
             }
