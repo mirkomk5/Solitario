@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using Solitario.Params;
 
 public class UserInputs : MonoBehaviour
 {
@@ -105,6 +104,7 @@ public class UserInputs : MonoBehaviour
         // Se la slot in alto è vuota e la carta selezionata è un asso, allora la carta può essere mossa
         if(slot1.CompareTag("Card"))
         {
+            // Solo se lo spazio vuoto ha lo stesso seme corrispondente alla carta selezionata, allora sarà possibile fare lo stack
             if(slot1.GetComponent<Selectable>().value == 1 && slot1.GetComponent<Selectable>().seme == selected.GetComponent<Selectable>().seme)
             {
                 Stack(selected);
@@ -189,14 +189,16 @@ public class UserInputs : MonoBehaviour
     {
         Selectable s2 = selected.GetComponent<Selectable>();
 
-        if (s2.inDeckPile)
+        if (s2.inDeckPile)  // Se si trova nel mazzo in alto da tre carte
         {
-            if (s2.name == solitario.tripsOnDisplay.Last())
+            if (s2.name == solitario.tripsOnDisplay.Last()) // Se è l'ultima delle 3 carte, non è bloccata
             {
                 return false;
             }
             else
+            {                                         // Le altre due invece dovranno rimanere non selezionabili
                 return true;
+            }
         } else
         {
             if (s2.name == solitario.bottoms[s2.row].Last())

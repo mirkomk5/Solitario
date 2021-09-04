@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Solitario/Scenes/Main.unity
+    guid: c0eb3d27bf3576040a84c26697c5540f
   m_configObjects: {}

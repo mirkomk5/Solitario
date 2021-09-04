@@ -56,8 +56,8 @@ public class CardFaceUpdate : MonoBehaviour
         if (userInputs.slot1)
         {
             if (name == userInputs.slot1.name)
-            
-                sRenderer.color = Color.yellow;         
+
+                sRenderer.color = Solitario_Params.COLOR_SELECTED;
             else
                 sRenderer.color = Color.white;
         }
