@@ -42,13 +42,11 @@ public class CardFaceUpdate : MonoBehaviour
     {
         if(selectable.faceUp == true)
         {
-            //sRenderer.sprite = cardFace;
             if(!flipped)
                 StartCoroutine(CardFlipHandle(cardFace));
         }
         else
         {
-            //sRenderer.sprite = cardBack;
             if(flipped)
                 StartCoroutine(CardFlipHandle(cardBack));
         }

@@ -6,11 +6,14 @@ using System.Linq;
 public class UserInputs : MonoBehaviour
 {
     public GameObject slot1;
+
     private SolitarioManager solitario;
+    private HistoryController history;
 
     void Start()
     {
         solitario = FindObjectOfType<SolitarioManager>();
+        history = FindObjectOfType<HistoryController>();
 
         slot1 = this.gameObject;
     }
@@ -58,6 +61,9 @@ public class UserInputs : MonoBehaviour
     {
         solitario.PickFromDeck();
 
+        // Registra l'azione come mossa sul mazzo di carte
+        history.Register(slot1, Solitario_History.ActionType.Deck);
+
         Solitario_Events.OnMoveDetected();
     }
 
@@ -69,6 +75,9 @@ public class UserInputs : MonoBehaviour
             if (!Blocked(selected))
             {
                 selected.GetComponent<Selectable>().faceUp = true;
+
+                // Registra l'azione come mossa di flip della carta
+                history.Register(selected, Solitario_History.ActionType.FaceUp);
                 slot1 = this.gameObject;
             }
         }// Se la carta invece si trova nel mazzo
@@ -88,6 +97,8 @@ public class UserInputs : MonoBehaviour
         {
             if (Stackable(selected))
             {
+                // Registra l'azione come mossa del gioco
+                history.Register(slot1, Solitario_History.ActionType.Moves);
                 Stack(selected);
                 Solitario_Events.OnStackOnBottom();
             }
@@ -107,6 +118,7 @@ public class UserInputs : MonoBehaviour
             // Solo se lo spazio vuoto ha lo stesso seme corrispondente alla carta selezionata, allora sarà possibile fare lo stack
             if(slot1.GetComponent<Selectable>().value == 1 && slot1.GetComponent<Selectable>().seme == selected.GetComponent<Selectable>().seme)
             {
+                history.Register(slot1, Solitario_History.ActionType.Moves, solitario.GetDeckLocation()-1);
                 Stack(selected);
                 Solitario_Events.OnStackOnTop();
             }
@@ -135,7 +147,12 @@ public class UserInputs : MonoBehaviour
 
     bool Stackable(GameObject selected)
     {
-        Selectable s1 = slot1.GetComponent<Selectable>();
+
+        Selectable s1 = null;
+        
+        if(slot1)
+            s1 = slot1.GetComponent<Selectable>();
+
         Selectable s2 = selected.GetComponent<Selectable>();
 
         // Previene che lo stack possa avvenire tra le carte inferiori verso quelle del mazzo
@@ -236,12 +253,15 @@ public class UserInputs : MonoBehaviour
         // Rimuove la carta dal mazzo
         if(s1.inDeckPile)
         {
+            // Rimuove la carta dal tris
             solitario.tripsOnDisplay.Remove(slot1.name);
+            // Rimuove la carta anche dalla lista di carte rimanenti memorizzate (BUG)
+            solitario.deckTrips[solitario.GetDeckLocation()-1].Remove(slot1.name);
         }
         else if(s1.top && s2.top && s1.value == 1) // Consente il movimento delle carte che si trovano in cima
         {
             solitario.topPos[s1.row].GetComponent<Selectable>().value = 0;
-            solitario.topPos[s1.row].GetComponent<Selectable>().seme = null;
+            solitario.topPos[s1.row].GetComponent<Selectable>().seme = null;         
         }
         else if(s1.top)
         {

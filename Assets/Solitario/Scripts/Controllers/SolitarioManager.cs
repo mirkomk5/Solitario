@@ -87,19 +87,19 @@ public class SolitarioManager : MonoBehaviour
     // Delegates *******************************************************************************
 
 
-    void StackOnTopHandle()
+    void StackOnTopHandle()  // Evento chiamato quando si procede allo stack con le carte dell'area superiore
     {
         playerScore += Solitario_Params.SCORE_TOPCARD;
         OnScoreUpdate();
     }
 
-    void StackOnBottomHandle()
+    void StackOnBottomHandle() // Evento chiamato quando si procede allo stack con le carte dell'area inferiore
     {
         playerScore += Solitario_Params.SCORE_BOTTOMCARD;
         OnScoreUpdate();
     }
 
-    void MovesHandle()
+    void MovesHandle()   // Evento chiamato ogni volta che il player faccia una mossa
     {
         playerMoves += 1;
         OnMovesUpdate();
@@ -111,7 +111,9 @@ public class SolitarioManager : MonoBehaviour
 
 
 
-
+    /// <summary>
+    /// Avvia il gioco
+    /// </summary>
     public void Play()
     {
         // Registra l'evento
@@ -131,6 +133,10 @@ public class SolitarioManager : MonoBehaviour
     }
 
 
+
+    /// <summary>
+    /// Procede alla mescola delle carte che verranno mostrate nella parte superiore
+    /// </summary>
     public void SortMainDeck()
     {
         trips = currentDeck.Count / 3;
@@ -170,9 +176,13 @@ public class SolitarioManager : MonoBehaviour
     }
 
 
+
+    /// <summary>
+    /// Genera il tris di carte che viene mostrato in alto
+    /// </summary>
     public void PickFromDeck()
     {
-        // Aggiunge le carte rimanenti a quelle scartate ed elimina il tris di carte quando arriva alla fine
+        // Rimuove le instanze dei tris prima di mostrare quelle successive
         foreach(Transform child in deckButton.transform)
         {
             if(child.tag == "Card")
@@ -187,7 +197,7 @@ public class SolitarioManager : MonoBehaviour
         // *******
 
 
-
+        // Se ci sono ancora carte nel mazzo, procede a mostrarne altre
         if(deckLocation < trips)
         {
             // mostra 3 carte dal mazzo
@@ -213,13 +223,72 @@ public class SolitarioManager : MonoBehaviour
             }
 
             deckLocation++;
+
+        }
+        else // Se le carte del mazzo sono finite, riprende dall'inizio
+        {
+            RestackTopDeck();
+
+            // Ogni volta che il player ha terminato il giro di tris di carte, il punteggio viene riazzerato (Ps. non conoscevo questa regola :) )
+            playerScore = 0;
+            // Tutte le voci esterne collegate a questo evento vengono ad essere richiamate
+            OnScoreUpdate();
+        }
+    }
+
+
+    /// <summary>
+    /// Metodo customizzato per la funzione Undo.
+    /// </summary>
+    /// <param name="deckId"></param>
+    public void PickFromDeckAt(int deckId)
+    {
+
+        foreach (Transform child in deckButton.transform)
+        {
+            if (child.tag == "Card")
+            {
+                currentDeck.Remove(child.name);
+                discardPile.Add(child.name);
+                Destroy(child.gameObject);
+            }
+        }
+
+        if (deckId < trips)
+        {
+            // mostra 3 carte dal mazzo
+            tripsOnDisplay.Clear();
+
+            float xOffset = Solitario_Params.CardOffset.xOffsetTrisCard;
+            float zOffset = Solitario_Params.CardOffset.zOffset;
+
+            foreach (string card in deckTrips[deckId])
+            {
+                GameObject topInstance = Instantiate(cardPrefab, new Vector3(deckButton.transform.position.x + xOffset, deckButton.transform.position.y, deckButton.transform.position.z + zOffset), Quaternion.identity, deckButton.transform);
+                xOffset -= Solitario_Params.CardOffset.xOffset;
+                zOffset -= Solitario_Params.CardOffset.zOffset;
+
+                topInstance.name = card;
+
+                tripsOnDisplay.Add(card);
+
+                topInstance.GetComponent<Selectable>().faceUp = true;
+
+                // Marca la carta come inDeckPile per differenziarla dal resto delle carte presenti nella parte inferiore
+                topInstance.GetComponent<Selectable>().inDeckPile = true;
+            }
+
+            deckLocation--;
         }
         else
         {
             RestackTopDeck();
+            playerScore = 0;
+            OnScoreUpdate();
         }
-    }
+        
 
+    }
 
 
     /// <summary>
@@ -243,6 +312,14 @@ public class SolitarioManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Ritorna alla posizione del tris di carte
+    /// </summary>
+    /// <returns></returns>
+    public int GetDeckLocation()
+    {
+        return deckLocation;
+    }
 
 
     // Internal void ****************************************************************************************************************************************
@@ -251,7 +328,11 @@ public class SolitarioManager : MonoBehaviour
 
 
 
-    // Sistema per mischiare le carte non utilizzando il semplice random di unity
+    /// <summary>
+    /// Metodo per mescolare le carte del mazzo
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="list"></param>
     void Shuffle<T>(List<T> list)
     {
         System.Random random = new System.Random();
@@ -270,7 +351,9 @@ public class SolitarioManager : MonoBehaviour
     
 
 
-    // Funzione per riporre le 52 carte nei vari slot inferiori
+    /// <summary>
+    /// Ripone le carte del mazzo nei vari slot inferiori
+    /// </summary>
     void SortCards()
     {
         for(int i=0; i<7; i++)
@@ -284,6 +367,10 @@ public class SolitarioManager : MonoBehaviour
     }
 
 
+
+    /// <summary>
+    /// Rimescola le carte rimanenti nel mazzo
+    /// </summary>
     void RestackTopDeck()
     {
         currentDeck.Clear();
@@ -294,13 +381,13 @@ public class SolitarioManager : MonoBehaviour
         }
 
         discardPile.Clear();
-        SortMainDeck();
-
+        SortMainDeck();      
     }
 
 
 
     // Coroutines ***********************************************************************************************************************
+
 
 
     IEnumerator InstantiateCards()
