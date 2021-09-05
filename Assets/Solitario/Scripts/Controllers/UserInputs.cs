@@ -61,6 +61,8 @@ public class UserInputs : MonoBehaviour
     {
         solitario.PickFromDeck();
 
+        slot1 = this.gameObject;
+
         // Registra l'azione come mossa sul mazzo di carte
         history.Register(slot1, Solitario_History.ActionType.Deck);
 
