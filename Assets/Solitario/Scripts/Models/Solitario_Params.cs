@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class Solitario_Params
 {
-    public static int SCORE_TOPCARD = 15;            // Punti assegnati per l'accoppiamento delle carte con la parte superiore
-    public static int SCORE_BOTTOMCARD = 5;          // Punti assegnati per l'accoppiamento delle carte con la parte inferiore
+    public static readonly int MAX_CARDS = 52;
+    public static readonly int SCORE_TOPCARD = 15;            // Punti assegnati per l'accoppiamento delle carte con la parte superiore
+    public static readonly int SCORE_BOTTOMCARD = 5;          // Punti assegnati per l'accoppiamento delle carte con la parte inferiore
 
     public static Color COLOR_SELECTED = new Color(0.89f, 0.91f, 0.66f);
 

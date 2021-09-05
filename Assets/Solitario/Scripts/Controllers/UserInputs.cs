@@ -118,7 +118,9 @@ public class UserInputs : MonoBehaviour
             // Solo se lo spazio vuoto ha lo stesso seme corrispondente alla carta selezionata, allora sarà possibile fare lo stack
             if(slot1.GetComponent<Selectable>().value == 1 && slot1.GetComponent<Selectable>().seme == selected.GetComponent<Selectable>().seme)
             {
+                // Registra l'evento per l'undo history
                 history.Register(slot1, Solitario_History.ActionType.Moves, solitario.GetDeckLocation()-1);
+
                 Stack(selected);
                 Solitario_Events.OnStackOnTop();
             }
@@ -255,8 +257,12 @@ public class UserInputs : MonoBehaviour
         {
             // Rimuove la carta dal tris
             solitario.tripsOnDisplay.Remove(slot1.name);
+
+
             // Rimuove la carta anche dalla lista di carte rimanenti memorizzate (BUG)
-            solitario.deckTrips[solitario.GetDeckLocation()-1].Remove(slot1.name);
+            /*solitario.deckTrips[solitario.GetDeckLocation()-1].Remove(slot1.name);
+            solitario.currentDeck.Remove(slot1.name);
+            solitario.discardPile.Remove(slot1.name);*/
         }
         else if(s1.top && s2.top && s1.value == 1) // Consente il movimento delle carte che si trovano in cima
         {
@@ -279,6 +285,12 @@ public class UserInputs : MonoBehaviour
 
         if(s2.top)
         {
+            // Aggiunge la carta alla lista delle carte finali
+            solitario.topStack.Add(s1.gameObject);
+
+            // Chiama l'evento associato a questa azione
+            Solitario_Events.OnCardMovedOnFinalStack();
+
             solitario.topPos[s1.row].GetComponent<Selectable>().value = s1.value;
             solitario.topPos[s1.row].GetComponent<Selectable>().seme = s1.seme;
             s1.top = true;
@@ -295,9 +307,9 @@ public class UserInputs : MonoBehaviour
     IEnumerator MoveCard(GameObject fromCard, Vector3 target)
     {
         float t = 0f;
-        while(t < 2f)
+        while(t < 1f)
         {
-            fromCard.transform.position = Vector3.Lerp(fromCard.transform.position, target, t / 2f);
+            fromCard.transform.position = Vector3.Lerp(fromCard.transform.position, target, t / 1f);
             t += Time.deltaTime;
             yield return null;
         }

@@ -35,4 +35,19 @@ public class Solitario_Events
     /// Viene chiamato ogni volta che viene fatta una mossa sulle carte in basso
     /// </summary>
     public static Action OnStackOnBottom = delegate { };
+
+    /// <summary>
+    /// Viene chiamato ogni volta che vi è una transizione di carta
+    /// </summary>
+    public static Action OnCardTransition = delegate { };
+
+    /// <summary>
+    /// Viene chiamata ogni volta che una carta viene posizionata in cima alla lista delle carte finali
+    /// </summary>
+    public static Action OnCardMovedOnFinalStack = delegate { };
+
+    /// <summary>
+    /// Metodo chiamato quando il giocatore vince la partita
+    /// </summary>
+    public static Action OnPlayerWin = delegate { };
 }

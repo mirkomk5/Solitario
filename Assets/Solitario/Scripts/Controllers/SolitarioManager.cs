@@ -5,34 +5,50 @@ using System.Linq;
 
 public class SolitarioManager : MonoBehaviour
 {
-    // Game status ***
-
-    public int playerScore = 0;
-    public int playerMoves = 0;
-
     // ****************
     // Public var ****
 
+
+    [Tooltip("Inserisci le sprite di tutte le carte del mazzo")]
     public Sprite[] cardFaces;
+
+    [Tooltip("Inserisci il prefab della carta da gioco")]
     public GameObject cardPrefab;
 
+    [Tooltip("Inserisci il gameObject della carta che consente il pescaggio dal mazzo")]
     public GameObject deckButton;
+
+    [Tooltip("Inserisci tutti gli spazi vuoti della parte inferiore del tavolo di gioco")]
     public GameObject[] bottomPos;
+
+    [Tooltip("Inserisci tutti gli spazi vuoti della parte superiore del tavolo di gioco")]
     public GameObject[] topPos;
+
+
+    // ****
+
+    [HideInInspector] public int playerScore = 0;
+    [HideInInspector] public int playerMoves = 0;
+    [HideInInspector] public float playerTime = 0f;
+
 
     public static string[] semi = new string[] { "C", "Q", "F", "P" };
     public static string[] values = new string[] { "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
 
-    public List<string> currentDeck;
-    public List<string> discardPile = new List<string>();
+    [HideInInspector] public List<string> currentDeck;
+    [HideInInspector] public List<string> discardPile = new List<string>();
+
 
     public List<string>[] bottoms;
     public List<string>[] tops;
-    public List<string> tripsOnDisplay = new List<string>();
+    [HideInInspector] public List<string> tripsOnDisplay = new List<string>();
     public List<List<string>> deckTrips = new List<List<string>>();
+
+
 
     // ****************
     // Internal var ***
+
 
     private List<string> bottom0 = new List<string>();
     private List<string> bottom1 = new List<string>();
@@ -42,15 +58,21 @@ public class SolitarioManager : MonoBehaviour
     private List<string> bottom5 = new List<string>();
     private List<string> bottom6 = new List<string>();
 
+    public List<GameObject> topStack = new List<GameObject> ();
+
     private int trips;
     private int tripsRemainder;
     private int deckLocation;
 
+    private bool gameIsRunning = false;
+
 
     // Events ********
 
+
     public System.Action OnScoreUpdate = delegate { };
     public System.Action OnMovesUpdate = delegate { };
+
 
     // Classic void **************************************************************************
 
@@ -65,7 +87,9 @@ public class SolitarioManager : MonoBehaviour
 
     void Update()
     {
-        
+        // Crono 
+        if (gameIsRunning)
+            playerTime += Time.deltaTime;
     }
 
     private void OnEnable()
@@ -73,6 +97,7 @@ public class SolitarioManager : MonoBehaviour
         Solitario_Events.OnStackOnTop += StackOnTopHandle;
         Solitario_Events.OnStackOnBottom += StackOnBottomHandle;
         Solitario_Events.OnMoveDetected += MovesHandle;
+        Solitario_Events.OnCardMovedOnFinalStack += GameWinHandle;
     }
 
     private void OnDisable()
@@ -80,6 +105,7 @@ public class SolitarioManager : MonoBehaviour
         Solitario_Events.OnStackOnTop -= StackOnTopHandle;
         Solitario_Events.OnStackOnBottom -= StackOnBottomHandle;
         Solitario_Events.OnMoveDetected -= MovesHandle;
+        Solitario_Events.OnCardMovedOnFinalStack -= GameWinHandle;
     }
 
 
@@ -103,6 +129,17 @@ public class SolitarioManager : MonoBehaviour
     {
         playerMoves += 1;
         OnMovesUpdate();
+    }
+
+    void GameWinHandle()
+    {
+        if (topStack.Count == Solitario_Params.MAX_CARDS)
+        {
+            Solitario_Events.OnPlayerWin();
+            SetGameStatus(false);
+        }
+
+        Debug.Log($"Carte stackate: {topStack.Count}");
     }
 
 
@@ -130,8 +167,20 @@ public class SolitarioManager : MonoBehaviour
         StartCoroutine(InstantiateCards());
         // Crea il mazzo di carte in alto
         SortMainDeck();
+
+        gameIsRunning = true;
     }
 
+    
+
+    /// <summary>
+    /// Setta lo stato attuale del gioco
+    /// </summary>
+    /// <param name="running">il gioco è in esecuzione?</param>
+    public void SetGameStatus(bool running)
+    {
+        gameIsRunning = running;
+    }
 
 
     /// <summary>
@@ -386,6 +435,14 @@ public class SolitarioManager : MonoBehaviour
 
 
 
+    public void GetPlayerTime(out int min, out int sec)
+    {
+        min = (int)playerTime / 60;
+        sec = (int)playerTime - (min * 60);
+    }
+
+
+
     // Coroutines ***********************************************************************************************************************
 
 
@@ -403,10 +460,20 @@ public class SolitarioManager : MonoBehaviour
                 // Simulo un delay per non farle comparire tutte insieme
                 yield return new WaitForSeconds(0.05f);
 
-                // Instance 
-                GameObject instance = Instantiate(cardPrefab,
+                // Instance carta
+                Vector3 target = new Vector3(bottomPos[i].transform.position.x, bottomPos[i].transform.position.y - yOffset, bottomPos[i].transform.position.z - zOffset);
+                GameObject instance = Instantiate(cardPrefab, deckButton.transform.position, Quaternion.identity);
+                
+                // Transizione carta
+                StartCoroutine(MoveCard(instance, target));
+
+                // Inserisce la carta all'interno della sua gerarchia corrispondente
+                instance.transform.SetParent(bottomPos[i].transform);
+
+                // Old instance (unused)
+                /*GameObject instance = Instantiate(cardPrefab,
                     new Vector3(bottomPos[i].transform.position.x, bottomPos[i].transform.position.y - yOffset, bottomPos[i].transform.position.z - zOffset), Quaternion.identity,
-                    bottomPos[i].transform);
+                    bottomPos[i].transform);*/
 
                 // Stabilisco un nome preciso per la carta
                 instance.name = card;
@@ -423,6 +490,9 @@ public class SolitarioManager : MonoBehaviour
                 zOffset += 0.03f;
 
                 discardPile.Add(card);
+
+                // Registra l'evento
+                Solitario_Events.OnCardTransition();
             }
         }
 
@@ -433,6 +503,20 @@ public class SolitarioManager : MonoBehaviour
                 currentDeck.Remove(card);
         }
         discardPile.Clear();
+    }
+
+
+
+
+    IEnumerator MoveCard(GameObject fromCard, Vector3 target)
+    {
+        float t = 0f;
+        while (t < 1f)
+        {
+            fromCard.transform.position = Vector3.Lerp(fromCard.transform.position, target, t / 1f);
+            t += Time.deltaTime;
+            yield return null;
+        }
     }
 
 
